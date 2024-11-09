@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Cap</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+        }
+        #container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            text-align: center;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+        input {
+            width: calc(100% - 30px);
+            padding: 12px;
+            margin: 8px 0;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 12px;
+            margin-bottom: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 15px;
+            font-size: 20px;
+            color: #28a745;
+            font-weight: bold;
+        }
+        #notification {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #dc3545;
+            font-weight: bold;
+        }
+        #shareBtn {
+            display: none; /* Initially hidden, shown only if a URL is generated */
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #17a2b8;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #shareBtn:hover {
+            background-color: #138496;
+        }
+    </style>
+</head>
+<body>
+<div id="container">
+    <h1>Link Cap</h1>
+    <input type="text" id="url" placeholder="Enter URL" required />
+    <input type="number" id="cap" placeholder="Enter Access Limit (default 99)" required />
+    <button onclick="shortenUrl()">Generate & Copy</button>
+    <a id="result"></a>
+    <div id="notification"></div>
+    <button id="shareBtn" onclick="shareUrl()">Share Link</button> <!-- Share button -->
+</div>
+<script src="script.js"></script>
+</body>
+</html>
