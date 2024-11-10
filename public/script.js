@@ -9,6 +9,12 @@ function shortenUrl() {
         return;
     }
 
+    let origin = window.location.origin
+    if((url + "").startsWith(origin)){
+        alert(`Please don't use link start with ${origin}`)
+        return
+    }
+
     fetch('/shorten', {
         method: 'POST',
         headers: {
@@ -98,7 +104,7 @@ async function redirectToZaloLogin() {
     const codeVerifier = generateCodeVerifier();
     const codeChallenge = await generateCodeChallenge(codeVerifier);
     const appId = "4129188943061618341";
-    const redirectUri = window.location + 'login/zalo' // URL đã cấu hình trong trang Zalo Developer
+    const redirectUri = window.location.origin + '/login/zalo' + window.location.search
     const state = "random_state_string"; // Một chuỗi ngẫu nhiên để chống CSRF
     // &code_challenge=${codeChallenge}
     window.location.href = `https://oauth.zaloapp.com/v4/permission?app_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`;
