@@ -121,7 +121,6 @@ app.post('/shorten', (req, res) => {
     const shortenedUrl = `redirect?limit=${limit}&id=${id}`
     res.json({shortenedUrl})
 })
-
 // Route to handle redirect with user session check
 app.get('/redirect', (req, res) => {
     // Check if the user is logged in
@@ -138,6 +137,7 @@ app.get('/redirect', (req, res) => {
 
     const urlData = urlDatabase[id];
     const userId = req.session.user.id;
+    const userName = req.session.user.name;
 
     if (!urlData) {
         return res.status(404).json({ message: 'URL not found' });
@@ -146,22 +146,31 @@ app.get('/redirect', (req, res) => {
     // Retrieve the limit directly from urlData
     const limit = urlData.limit;
 
-    // Initialize accessedUsers set if it doesn't exist
+    // Initialize accessedUsers map if it doesn't exist
     if (!urlData.accessedUsers) {
-        urlData.accessedUsers = new Set();
+        urlData.accessedUsers = new Map();
     }
 
     // Check if the number of unique users has reached the limit
     if (urlData.accessedUsers.size >= limit) {
-        return res.status(403).send(`Access limit of ${limit} unique users reached`);
+        // Convert accessedUsers Map to an array of objects with id and name
+        const accessedUsersList = Array.from(urlData.accessedUsers.entries()).map(([id, name]) => ({ id, name }));
+        return res.status(403).json({
+            message: `Access limit of ${limit} unique users reached`,
+            accessedUsers: accessedUsersList
+        });
     }
 
-    // Add user ID to accessedUsers if not already present
-    urlData.accessedUsers.add(userId);
+    // Add user to accessedUsers map if not already present
+    if (!urlData.accessedUsers.has(userId)) {
+        urlData.accessedUsers.set(userId, userName);
+    }
 
     // Redirect to the original URL
     res.redirect(urlData.originalUrl);
 });
+
+
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'))
