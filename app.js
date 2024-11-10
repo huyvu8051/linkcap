@@ -13,6 +13,61 @@ const getClientIp = (req) => {
     return req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 };
 
+
+const axios = require('axios');
+
+const ZALO_APP_ID = '4129188943061618341';
+const ZALO_APP_SECRET = 'XKw094clAAs7BHU8dY3C';
+
+app.get('/login/zalo', async (req, res) => {
+    const { code, state } = req.query;
+
+    if (!code) {
+        return res.status(400).json({ message: 'Authorization code is missing' });
+    }
+
+    // Dynamically construct the redirect URI based on the request
+    const ZALO_REDIRECT_URI = `${req.protocol}://${req.get('host')}/login/zalo`;
+
+    try {
+        // Step 1: Exchange authorization code for access token
+        const tokenResponse = await axios.post(
+            'https://oauth.zaloapp.com/v4/access_token',
+            new URLSearchParams({
+                app_id: ZALO_APP_ID,
+                code: code,
+                grant_type: 'authorization_code'
+            }),
+            {
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded',"secret_key": `${ZALO_APP_SECRET}` }
+            }
+        );
+
+        const { access_token } = tokenResponse.data;
+
+        if (!access_token) {
+            return res.status(400).json({ message: 'Failed to obtain access token' });
+        }
+
+        // Step 2: Use access token to retrieve user information
+        const userInfoResponse = await axios.get(
+            `https://graph.zalo.me/v2.0/me?access_token=${access_token}&fields=id,name,picture`
+        );
+
+        const userInfo = userInfoResponse.data;
+
+        // Send user information as JSON response (or process it further as needed)
+        res.json({
+            message: 'User information retrieved successfully',
+            userInfo
+        });
+    } catch (error) {
+        console.error('Error during Zalo login callback:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+});
+
+
 // Route to shorten URL
 app.post('/shorten', (req, res) => {
     const { originalUrl, limit } = req.body;
@@ -54,6 +109,9 @@ app.get('/:limit/:id', (req, res) => {
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+
+
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
