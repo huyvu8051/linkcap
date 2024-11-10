@@ -64,3 +64,45 @@ function shareUrl() {
         document.getElementById('notification').style.color = '#dc3545';
     }
 }
+
+function login(){
+    // Gọi hàm này khi người dùng nhấn vào nút "Đăng nhập với Zalo"
+    redirectToZaloLogin();
+
+}
+
+// Hàm tạo code verifier
+function generateCodeVerifier(length = 43) {
+    const possibleChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let verifier = "";
+    for (let i = 0; i < length; i++) {
+        verifier += possibleChars.charAt(Math.floor(Math.random() * possibleChars.length));
+    }
+    return verifier;
+}
+
+// Hàm tạo code challenge từ code verifier
+async function generateCodeChallenge(verifier) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(verifier);
+    const digest = await crypto.subtle.digest("SHA-256", data);
+    return btoa(String.fromCharCode(...new Uint8Array(digest)))
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=+$/, "");
+}
+
+
+// Hàm chuyển hướng người dùng để lấy authorization code
+async function redirectToZaloLogin() {
+    const codeVerifier = generateCodeVerifier();
+    const codeChallenge = await generateCodeChallenge(codeVerifier);
+    const appId = "4129188943061618341";
+    const redirectUri = "https://linkcap.onrender.com"; // URL đã cấu hình trong trang Zalo Developer
+    const state = "random_state_string"; // Một chuỗi ngẫu nhiên để chống CSRF
+
+    window.location.href = `https://oauth.zaloapp.com/v4/permission?app_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&code_challenge=${codeChallenge}&state=${state}`;
+}
+
+
+
